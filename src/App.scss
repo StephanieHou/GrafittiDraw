@@ -1,0 +1,74 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background-color: black !important;
+}
+
+div {
+    height: 100%;
+}
+
+@font-face {
+    font-family: "Inner City";
+    font-style: normal;
+    font-weight: normal;
+    src: local("Inner City"), url("./Fonts/InnerCity.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Forque";
+    font-style: normal;
+    font-weight: normal;
+    src: local("Forque"), url("./Fonts/Forque.ttf") format("truetype");
+}
+
+.loading {
+    background-color: white;
+    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    p {
+        font-family: "Inner City";
+        font-weight: bold;
+    }
+}
+
+polygon {
+    fill: black;
+}
+
+linearGradient stop {
+    stop-color: black;
+    stop-opacity: 1;
+}
+
+.loading-first {
+    fill: url(#firstLoadingGradient);
+}
+
+.loading-second {
+    fill: url(#secondLoadingGradient);
+}
+
+.loading-third {
+    fill: url(#thirdLoadingGradient);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
