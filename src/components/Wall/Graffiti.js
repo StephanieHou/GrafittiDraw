@@ -1,95 +1,147 @@
 import React from "react";
 import ReactDOM from 'react-dom';
-import Immutable from 'immutable';
 import './Wall.scss';
 
 class Graffiti extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            lines: new Immutable.List(),
-            isDrawing: false
-        };
-
-        this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.handleMouseUp = this.handleMouseUp.bind(this);
-    }
-
-    componentDidMount() {
-        document.addEventListener("mouseup", this.handleMouseUp);
-    }
-
-    componentWillUnmount() {
-        document.removeEventListener("mouseup", this.handleMouseUp);
-    }
-
-    handleMouseDown(mouseEvent) {
-        if (mouseEvent.button != 0) {
-            return;
+            prevX: 0,
+            currX: 0,
+            prevY: 0,
+            currY: 0,
+            flag: false,
+            dotFlag: false,
+            color: this.props.color,
+            size: this.props.size
         }
+    };
 
-        const point = this.relativeCoordinatesForEvent(mouseEvent);
-
-        this.setState(prevState => ({
-            lines: prevState.lines.push(new Immutable.List([point])),
-            isDrawing: true
-        }));
-    }
-
-    handleMouseMove(mouseEvent) {
-        if (!this.state.isDrawing) {
-            return;
-        }
-
-        const point = this.relativeCoordinatesForEvent(mouseEvent);
-
-        this.setState(prevState => ({
-            lines: prevState.lines.updateIn([prevState.lines.size - 1], line => line.push(point))
-        }));
-    }
-
-    handleMouseUp() {
-        this.setState({ isDrawing: false });
-    }
-
-    relativeCoordinatesForEvent(mouseEvent) {
-        const boundingRect = this.refs.drawArea.getBoundingClientRect();
-        return new Immutable.Map({
-            x: mouseEvent.clientX - boundingRect.left,
-            y: mouseEvent.clientY - boundingRect.top
+    componentWillReceiveProps(newProps) {
+        this.setState({
+            color: newProps.color,
+            size: newProps.size
         });
     }
 
-    render() {
-        return (
-            React.createElement("div", {
-                className: "drawArea",
-                ref: "drawArea",
-                onMouseDown: this.handleMouseDown,
-                onMouseMove: this.handleMouseMove
-            },
-                React.createElement(Drawing, { lines: this.state.lines })));
+    componentDidMount() {
+        var canvas = this.refs.canvas;
+        var ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        canvas.addEventListener("mousemove", this.handleMouseMove);
+
+        canvas.addEventListener("mousedown", this.handleMouseDown);
+
+        canvas.addEventListener("mouseup", this.handleMouseUp);
+
+        canvas.addEventListener("mouseout", this.handleMouseOut);
     }
-}
 
+    componentWillUnmount() {
+        var canvas = this.refs.canvas;
 
-function Drawing({ lines }) {
-    return (
-        React.createElement("svg", { className: "drawing" },
-            lines.map((line, index) =>
-                React.createElement(DrawingLine, { key: index, line: line }))));
-}
+        canvas.removeEventListener("mousemove", this.handleMouseMove);
 
-function DrawingLine({ line }) {
-    const pathData = "M " +
-        line.
-            map(p => {
-                return `${p.get('x')} ${p.get('y')}`;
-            }).
-            join(" L ");
+        canvas.removeEventListener("mousedown", this.handleMouseDown);
 
-    return React.createElement("path", { className: "path", d: pathData });
+        canvas.removeEventListener("mouseup", this.handleMouseUp);
+
+        canvas.removeEventListener("mouseout", this.handleMouseOut);
+    }
+
+    handleMouseDown = (e) => {
+        var currX = this.state.currX;
+        var currY = this.state.currY;
+        var canvas = this.refs.canvas;
+        var ctx = canvas.getContext("2d");
+        var size = this.state.size;
+        var color = this.state.color;
+        var flag = true;
+        var dotFlag = true;
+
+        var newPrevX = currX;
+        var newPrevY = currY;
+        currX = e.clientX - canvas.offsetLeft;
+        currY = e.clientY - canvas.offsetTop;
+
+        if (dotFlag) {
+
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            ctx.arc(currX, currY, size/2 , 0, 2 * Math.PI, false);
+            ctx.closePath();
+            dotFlag = false;
+        }
+
+        this.setState({
+            prevX: newPrevX,
+            prevY: newPrevY,
+            currX: currX,
+            currY: currY,
+            dotFlag: dotFlag,
+            flag: flag
+        });
+    }
+
+    handleMouseUp = (e) => {
+        this.setState({
+            flag: false
+        });
+    }
+
+    handleMouseMove = (e) => {
+        var currX = this.state.currX;
+        var currY = this.state.currY;
+        var canvas = this.refs.canvas;
+        var flag = this.state.flag;
+
+        if (flag) {
+            var newPrevX = currX;
+            var newPrevY = currY;
+            var newCurrX = e.clientX - canvas.offsetLeft;
+            var newCurrY = e.clientY - canvas.offsetTop;
+            this.handleDraw(canvas, newPrevX, newPrevY, newCurrX, newCurrY);
+
+            this.setState({
+                prevX: newPrevX,
+                prevY: newPrevY,
+                currX: newCurrX,
+                currY: newCurrY
+            });
+        }
+    }
+
+    handleMouseOut = (e) => {
+        this.setState({
+            flag: false
+        });
+    }
+
+    handleDraw = (canvas, prevX, prevY, currX, currY) => {
+        var ctx = canvas.getContext("2d");
+        var color = this.state.color;
+        var size = this.state.size;
+
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(currX, currY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size;
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    render() {
+        const { prevX, prevY, currX, currY, color, flag } = this.state;
+        return (
+            <div className='canvas'>
+                <canvas ref="canvas" id="draw-canvas" />
+            </div>
+        )
+    }
 }
 
 export default Graffiti;

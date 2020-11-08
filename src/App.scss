@@ -23,6 +23,27 @@ div {
     src: local("Forque"), url("./Fonts/Forque.ttf") format("truetype");
 }
 
+@font-face {
+    font-family: "Docallisme";
+    font-style: normal;
+    font-weight: normal;
+    src: local("Docallisme"), url("./Fonts/Docallisme.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "FontBubble";
+    font-style: normal;
+    font-weight: normal;
+    src: local("FontBubble"), url("./Fonts/FontBubble.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "NextCustom";
+    font-style: normal;
+    font-weight: normal;
+    src: local("NextCustom"), url("./Fonts/NextCustom.ttf") format("truetype");
+}
+
 .loading {
     background-color: white;
     height: 100vh;
